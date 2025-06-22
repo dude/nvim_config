@@ -102,7 +102,7 @@ vim.g.have_nerd_font = false
 vim.o.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
@@ -424,6 +424,51 @@ require('lazy').setup({
       pcall(require('telescope').load_extension, 'fzf')
       pcall(require('telescope').load_extension, 'ui-select')
 
+      vim.keymap.set('n', '<leader>q', ':q<CR>', { desc = '[Q]uit' })
+
+      -- Move line up/down in normal mode
+      vim.keymap.set('n', '<S-j>', ':m .+1<CR>==', { desc = 'Move line down' })
+      vim.keymap.set('n', '<S-k>', ':m .-2<CR>==', { desc = 'Move line up' })
+
+      vim.keymap.set('n', '<leader>ya', ':%y<CR>', { desc = '[Y]ank [A]ll' })
+
+      -- Navigate between windows
+      vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Move to left window' })
+      vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Move to bottom window' })
+      vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Move to top window' })
+      vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Move to right window' })
+
+      -- Also works in terminal mode
+      vim.keymap.set('t', '<C-h>', '<C-\\><C-n><C-w>h', { desc = 'Move to left window' })
+      vim.keymap.set('t', '<C-j>', '<C-\\><C-n><C-w>j', { desc = 'Move to bottom window' })
+      vim.keymap.set('t', '<C-k>', '<C-\\><C-n><C-w>k', { desc = 'Move to top window' })
+      vim.keymap.set('t', '<C-l>', '<C-\\><C-n><C-w>l', { desc = 'Move to right window' })
+
+      -- Move selection up/down in visual mode
+      vim.keymap.set('v', '<C-j>', ":m '>+1<CR>gv=gv", { desc = 'Move selection down' })
+      vim.keymap.set('v', '<C-k>', ":m '<-2<CR>gv=gv", { desc = 'Move selection up' })
+
+      vim.keymap.set('n', '<Tab>', ':bnext<CR>', { desc = 'Next buffer' })
+      vim.keymap.set('n', '<S-Tab>', ':bprevious<CR>', { desc = 'Previous buffer' })
+
+      -- Terminal keymaps
+      vim.keymap.set('n', '<leader>tn', ':split | resize 15 | terminal<CR>i', { desc = '[T]erminal [N]ew' })
+      vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+      vim.keymap.set('n', '<leader>tt', function()
+        -- Create horizontal split at bottom for terminals
+        vim.cmd 'botright split'
+        vim.cmd 'resize 15' -- Adjust height as needed
+        vim.cmd 'terminal'
+
+        -- Create vertical split for second terminal
+        vim.cmd 'vsplit'
+        vim.cmd 'terminal'
+
+        -- Start in the left terminal in insert mode
+        vim.cmd 'wincmd h'
+        vim.cmd 'startinsert'
+      end, { desc = '[T]erminal [T]wo new terminals' })
+
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
@@ -670,18 +715,20 @@ require('lazy').setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
+        kotlin_lsp = {}, -- JetBrains Kotlin LSP via Mason
+        pyright = {},
+        rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
+        ts_ls = {},
         --
 
         lua_ls = {
@@ -722,6 +769,7 @@ require('lazy').setup({
       require('mason-lspconfig').setup {
         ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
         automatic_installation = false,
+        automatic_enable = true,
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
@@ -735,7 +783,6 @@ require('lazy').setup({
       }
     end,
   },
-
   { -- Autoformat
     'stevearc/conform.nvim',
     event = { 'BufWritePre' },

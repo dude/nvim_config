@@ -1,7 +1,29 @@
-tags
-test.sh
-.luarc.json
-nvim
-
-spell/
+# Neovim data directories
 lazy-lock.json
+.luarc.json
+
+# Plugin data (these will be reinstalled by lazy.nvim)
+# Don't exclude lazy-lock.json if you want exact plugin versions
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# LSP/Mason installed tools (will reinstall automatically)
+# mason/ directory is usually in data, not config
+
+# Undo history
+undo/
+
+# Session files
+Session.vim
+.session
+
+# Log files
+*.log
